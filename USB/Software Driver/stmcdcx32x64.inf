@@ -1,0 +1,139 @@
+;------------------------------------------------------------------------------
+; STMicroelectronics Comunication Device Class driver (CDC) INF FILE
+; (C)2009 Copyright STMicroelectronics
+;------------------------------------------------------------------------------
+
+[Version]
+Signature="$Windows NT$"
+Class=Ports
+ClassGuid={4D36E978-E325-11CE-BFC1-08002BE10318}
+Provider=%STM%
+LayoutFile=layout.inf
+;CatalogFile=%FILENAME%.cat
+
+DriverVer= 9/20/2009,1.2.0
+
+[Manufacturer]
+%STM%=DeviceList,NTamd64
+
+[DestinationDirs]
+DefaultDestDir=12
+
+
+;------------------------------------------------------------------------------
+;              Windows 2000/XP/Vista32 Support
+;------------------------------------------------------------------------------
+[STMUSB.nt]
+include=mdmcpq.inf
+CopyFiles=DriverCopyFiles.nt
+AddReg=STMUSB.nt.AddReg
+
+[DriverCopyFiles.nt]
+usbser.sys,,,0x20
+
+[STMUSB.nt.AddReg]
+HKR,,DevLoader,,*ntkern
+HKR,,NTMPDriver,,%DRIVERFILENAME%.sys
+HKR,,EnumPropPages32,,"MsPorts.dll,SerialPortPropPageProvider"
+
+[STMUSB.nt.Services]
+AddService=usbser, 0x00000002, DriverService.nt
+
+[DriverService.nt]
+DisplayName=%SERVICE%
+ServiceType=1
+StartType=3
+ErrorControl=1
+ServiceBinary=%12%\%DRIVERFILENAME%.sys
+
+;------------------------------------------------------------------------------
+;  Windows 2000/XP Sections
+;------------------------------------------------------------------------------
+
+[STMUSB.nt] 
+include=mdmcpq.inf
+CopyFiles=DriverCopyFiles
+AddReg=STMUSB.nt.AddReg 
+
+[DriverCopyFiles]
+usbser.sys,,,0x20
+
+[STMUSB.nt.AddReg] 
+HKR,,DevLoader,,*ntkern 
+HKR,,NTMPDriver,,usbser.sys 
+HKR,,EnumPropPages32,,"MsPorts.dll,SerialPortPropPageProvider" 
+
+[STMUSB.nt.Services] 
+AddService=usbser, 0x00000002, DriverService
+
+
+[STMUSB.nt.HW]
+include=mdmcpq.inf
+
+[DriverService] 
+DisplayName=%DESCRIPTION% 
+ServiceType=1
+StartType=3
+ErrorControl=1
+ServiceBinary=%12%\usbser.sys 
+
+;------------------------------------------------------------------------------
+;              Windows Vista x64 / Windows7 x64 Support
+;------------------------------------------------------------------------------
+
+[STMUSB.NTamd64]
+include=mdmcpq.inf
+CopyFiles=DriverCopyFiles.NTamd64
+AddReg=STMUSB.NTamd64.AddReg
+
+[DriverCopyFiles.NTamd64]
+%DRIVERFILENAME%.sys,,,0x20
+
+[STMUSB.NTamd64.AddReg]
+HKR,,DevLoader,,*ntkern
+HKR,,NTMPDriver,,%DRIVERFILENAME%.sys
+HKR,,EnumPropPages32,,"MsPorts.dll,SerialPortPropPageProvider"
+
+[STMUSB.NTamd64.Services]
+AddService=usbser, 0x00000002, DriverService.NTamd64
+
+[DriverService.NTamd64]
+DisplayName=%SERVICE%
+ServiceType=1
+StartType=3
+ErrorControl=1
+ServiceBinary=%12%\%DRIVERFILENAME%.sys
+
+
+;------------------------------------------------------------------------------
+;            VID/PID Settings
+;------------------------------------------------------------------------------
+[SourceDisksFiles]
+[SourceDisksNames]
+[DeviceList]
+%DESCRIPTION%=STMUSB,USB\VID_1314&PID_0521
+
+[DeviceList.NTamd64]
+%DESCRIPTION%=STMUSB,USB\VID_1314&PID_0521
+
+
+;------------------------------------------------------------------------------
+;              String Definitions
+;------------------------------------------------------------------------------
+[Strings]
+
+FILENAME="ST_Virtual"
+DRIVERFILENAME ="usbser"
+;公司名
+COMPANY="凌智电子"
+;制造商
+;STM="STMicroelectronics"
+STM="凌智电子"
+;设备名称
+;DESCRIPTION="STM Virtual COM Port" 
+DESCRIPTION="凌智电子 虚拟串口"
+INSTDISK="CDC_DISK"
+SERVICE="Virtual Com Driver"
+
+
+
