@@ -15,9 +15,10 @@ void UP_024(void)
     PC4_OFF;
     PC0_OFF;
     PC2_ON;
-    Delay_10us(1);
+
     PC2_OFF; //下边沿触发
     PC4_ON;
+
 }
 
 void DOWN_024(void)
@@ -25,9 +26,10 @@ void DOWN_024(void)
     PC4_OFF;
     PC0_ON;
     PC2_ON;
-    Delay_10us(1);
+
     PC2_OFF;//下边沿触发
     PC4_ON;
+
 }
 
 void UP_135(void)
@@ -35,9 +37,10 @@ void UP_135(void)
     PC5_OFF;
     PC1_OFF;
     PC3_ON;
-    Delay_10us(1);
+
     PC3_OFF;//下边沿触发
     PC5_ON;
+
 }
 
 void DOWN_135(void)
@@ -45,7 +48,8 @@ void DOWN_135(void)
     PC5_OFF;
     PC1_ON;
     PC3_ON;
-    Delay_10us(1);
+
     PC3_OFF;//下边沿触发
     PC5_ON;
+
 }

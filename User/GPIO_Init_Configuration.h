@@ -17,6 +17,8 @@
 //-----------------------------------------------------------------
 // 位操作
 //-----------------------------------------------------------------
+
+//定义电位器引脚电平调节函数
 #define PC0_OFF GPIO_ResetBits(GPIOC, GPIO_Pin_0)
 #define PC0_ON GPIO_SetBits(GPIOC, GPIO_Pin_0)
 #define PC1_OFF GPIO_ResetBits(GPIOC, GPIO_Pin_1)
@@ -30,6 +32,7 @@
 #define PC5_OFF GPIO_ResetBits(GPIOC, GPIO_Pin_5)
 #define PC5_ON GPIO_SetBits(GPIOC, GPIO_Pin_5)
 
+//定义控制卡引脚电平调节函数
 #define PA_OFF(x)                           \
     switch (x)                              \
     {                                       \

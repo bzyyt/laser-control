@@ -7,7 +7,7 @@
 // 修改日期: 2022-12-28
 // 当前版本: V1.0.1
 // 历史版本:
-//  - V1.0: (2014-02-07)LED IO 配置
+//  - V1.0: (2014-02-07)IO 配置
 // - V1.0.1:(2014-02-16)头文件中不包含其他头文件
 // 调试工具: 凌智STM32核心开发板、LZE_ST_LINK2
 // 说    明:
@@ -58,7 +58,7 @@ void GPIO_Init_Configuration(void)
   PC5_ON;
   // 初始化GPIO口
 
-  // GPIOA的0~7口打开
+  // GPIOA的0~10口打开
   GPIO_InitStructureLight.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10;
   GPIO_InitStructureLight.GPIO_Speed = GPIO_Speed_50MHz;
   // 推挽输出
