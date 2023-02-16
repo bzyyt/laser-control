@@ -1,5 +1,0 @@
--c --cpu Cortex-M3 -g -O0 --apcs=interwork -I..\CMSIS\DeviceSupport\STM32F10x -I..\STM32F10x_StdPeriph_Driver\inc -I..\User -I..\CMSIS\CoreSupport -I..\STM32_USB-FS-Device_Driver\inc -I..\USB\inc -I..\CMSIS -I..\User\Fonts 
--I "E:\Keil MDK-ARM\ARM\RV31\INC" 
--I "E:\Keil MDK-ARM\ARM\CMSIS\Include" 
--I "E:\Keil MDK-ARM\ARM\Inc\ST\STM32F10x" 
--DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -o ".\Obj\numtostr.o" --omf_browse ".\Obj\numtostr.crf" --depend ".\Obj\numtostr.d" "..\User\numtostr.c"
