@@ -25,6 +25,7 @@
 #include "stm32f10x_it.h"
 #include "usb_istr.h"
 #include "usb_lib.h"
+// // #include "usb_pwr.h"
 #include "hw_config.h"
 #include "platform_config.h"
 /** @addtogroup STM32F10x_StdPeriph_Template

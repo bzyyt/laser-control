@@ -109,9 +109,13 @@ void EP1_IN_Callback(void) // EP1_IN_Callback 回调函数
 u32 Instruction_Decoding(void) // 指令编码函数
 {
   u32 returning = 0;
-  if (USB_Rx_Buffer[0] == (uint8_t)'0' && USB_Rx_Buffer[1] == (uint8_t)'0')
+  if (USB_Rx_Buffer[0] == (uint8_t)'1' && USB_Rx_Buffer[1] == (uint8_t)'1')
   {
-    returning += 0; // Resistance 00
+    returning += 1; // Power
+  }
+  else if (USB_Rx_Buffer[0] == (uint8_t)'0' && USB_Rx_Buffer[1] == (uint8_t)'0')
+  {
+    returning += 0; // Resistance
   }
   else
   {
@@ -120,11 +124,23 @@ u32 Instruction_Decoding(void) // 指令编码函数
   returning *= 10;
   if (USB_Rx_Buffer[2] == (uint8_t)'1' && USB_Rx_Buffer[3] == (uint8_t)'1')
   {
-    returning += 1; // Up 11
+    returning += 1; // Up
   }
   else if (USB_Rx_Buffer[2] == (uint8_t)'0' && USB_Rx_Buffer[3] == (uint8_t)'0')
   {
-    returning += 0; // Down 00
+    returning += 0; // Down
+  }
+  else if (USB_Rx_Buffer[2] == (uint8_t)'2' && USB_Rx_Buffer[3] == (uint8_t)'2')
+  {
+    returning += 2; // Set
+  }
+  else if (USB_Rx_Buffer[2] == (uint8_t)'3' && USB_Rx_Buffer[3] == (uint8_t)'3')
+  {
+    returning += 3; // Set
+  }
+  else if (USB_Rx_Buffer[2] == (uint8_t)'4' && USB_Rx_Buffer[3] == (uint8_t)'4')
+  {
+    returning += 4; // Set
   }
   else
   {
@@ -135,14 +151,13 @@ u32 Instruction_Decoding(void) // 指令编码函数
 
 void Resistance_Change(u16 target) // 电位器调整函数
 {
-  if (target < 298 && target > 0)
+  if (target < 961 && target > 0)
   {
 
     for (i = 0; i < 100; i++)
     {
       DOWN_024();
       DOWN_135();
-
     }
     for (i = 0; i < r1[target]; i++)
     {
@@ -155,11 +170,30 @@ void Resistance_Change(u16 target) // 电位器调整函数
   }
 }
 
+void Laser_Power_Change(u16 target) // 激光功率调整函数
+{
+  int j;
+  int temp_laser;
+  PA_OFF(9); // 这边假设是置1锁功率，如果是置零锁功率的话还要调整
+  for (j = 0; j <= 7; j++)
+  {
+    temp_laser = (target & 1);
+    target >>= 1;
+    if (temp_laser)
+    {
+      PA_ON(j);
+    }
+    else
+    {
+      PA_OFF(j);
+    }
+  }
+  PA_ON(9);
+}
+
 u8 *Message_compile(u16 target, u8 *message) // 数值至字符串转换
 {
   u16 index = 0;
-	u8 temp;
-	u16 i;
   message[index] = target % 10 + '0';
   while ((u16)(target /= 10))
   {
@@ -167,13 +201,37 @@ u8 *Message_compile(u16 target, u8 *message) // 数值至字符串转换
     message[index] = target % 10 + '0';
   }
   message[index + 1] = 0;
-  for (i = 0; i < (index + 1) / 2; i++)//逆序
-  {
-      temp = message[i];
-      message[i] = message[index - i];
-      message[index - i] = temp;
-  }
   return message;
+}
+
+u8 *Message_Info(u16 number, u8 *message) // info的信息填充
+{                                         // 真想换一种方式，这也太丑了
+  switch (number)
+  {
+  case 1: // 激光器成功开启
+    message[0] = "L";
+    message[1] = "a";
+    message[2] = "s";
+    message[3] = "e";
+    message[4] = "r";
+    message[5] = " ";
+    message[6] = "O";
+    message[7] = "N";
+    message[8] = 0;
+    break;
+  case 2: // 激光器成功关闭
+    message[0] = "L";
+    message[1] = "a";
+    message[2] = "s";
+    message[3] = "e";
+    message[4] = "r";
+    message[5] = " ";
+    message[6] = "O";
+    message[7] = "F";
+    message[8] = "F";
+    message[9] = 0;
+    break;
+  }
 }
 
 u8 *Message_error(u8 *message) // 错误信息填充
@@ -230,14 +288,10 @@ void EP3_OUT_Callback(void)
     switch (Instruction_Decoding())
     {
     case 1: // 调大电阻
-      if (R_index < 298)
+      if (R_index < 961)
       {
         R_index++;
         Message_compile(R_index, Message_send);
-      }
-      else
-      {
-          Message_error(Message_send);
       }
       break;
 
@@ -247,16 +301,67 @@ void EP3_OUT_Callback(void)
         R_index--;
         Message_compile(R_index, Message_send);
       }
+      break;
+
+    case 2: // 电阻调整至对应值
+      if (USB_Rx_Buffer[4] <= (uint8_t)'9')
+      {
+        R_index = (USB_Rx_Buffer[4] - '0') * 100 + (USB_Rx_Buffer[5] - '0') * 10 + (USB_Rx_Buffer[6] - '0');
+        Message_compile(R_index, Message_send);
+      }
       else
       {
-          Message_error(Message_send);
+        Message_error(Message_send);
       }
       break;
 
+    case 10: // 调小激光功率
+      if (Laser_Power > 0)
+      {
+        Laser_Power--;
+        Message_compile(Laser_Power, Message_send);
+      }
+      break;
+
+    case 11: // 调大激光功率
+      if (Laser_Power < 255)
+      {
+        Laser_Power++;
+        Message_compile(Laser_Power, Message_send);
+      }
+      break;
+
+    case 12: // 激光功率调整到对应值
+
+      temp1 = (USB_Rx_Buffer[5] - '0') * 100 + (USB_Rx_Buffer[6] - '0') * 10 + (USB_Rx_Buffer[7] - '0');
+      temp2 = (USB_Rx_Buffer[9] - '0') * 100 + (USB_Rx_Buffer[10] - '0') * 10 + (USB_Rx_Buffer[11] - '0');
+      if ((temp1 == temp2) && temp1 >= 1 && temp1 <= 255)
+      {
+        Laser_Power = temp1;
+        Message_compile(Laser_Power, Message_send);
+      }
+      else
+      {
+        Message_error(Message_send);
+      }
+      break;
+    case 13:                         // 打开激光器
+      PA_ON(9);                      // 先打开18针
+      Delay_1ms(5);                  // 按照说明需要延迟5ms
+      PA_ON(10);                     // 再打开19针
+      Message_Info(1, Message_send); // 填充成功开启激光器
+      break;
+    case 14:                         // 关闭激光器
+      PA_OFF(10);                    // 先关闭19针
+      Delay_1ms(5);                  // 这边八成也要延时5ms
+      PA_OFF(9);                     // 再关闭18针
+      Message_Info(2, Message_send); // 填充成功关闭激光器
+      break;
     default: // 其他情况报错
       Message_error(Message_send);
     }
-    Resistance_Change(R_index);//改变阻值
+    Resistance_Change(R_index);
+    Laser_Power_Change(Laser_Power);
     USB_Send_string(Message_send, Message_len(Message_send)); // 发送消息至上位机
   }
 

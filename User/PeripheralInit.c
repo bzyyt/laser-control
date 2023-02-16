@@ -40,11 +40,11 @@
 //
 //-----------------------------------------------------------------
 
-extern u16 R_index;//声明数据角标
+extern int R_index;//声明数据角标
 
 void PeripheralInit(void)
 {
-  u16 i;//定义循环变量
+  int i;//定义循环变量
 
   GPIO_Init_Configuration(); // GPIO 初始化配置
 
