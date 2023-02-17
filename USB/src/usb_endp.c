@@ -47,8 +47,6 @@
 /* Private variables ---------------------------------------------------------*/
 u8 Receive_Flag;     // 接收数据成功标志位
 u16 Receive_Num;     // 接收到的数据个数
-u16 Laser_Power = 0; // 激光器的能量值
-
 u16 i;     // 循环变量
 u16 temp1; // 临时变量
 u16 temp2;
@@ -106,12 +104,13 @@ void EP1_IN_Callback(void) // EP1_IN_Callback 回调函数
   }
 }
 
-//0000 -- 00 操控电位器，DOWN
-//0011 -- 01 操控电位器，UP
-//1100 -- 10 操控控制板，DOWN
-//1111 -- 11 操控控制板，UP
-//2211 -- 12 开启控制板，OPEN
-//3311 -- 13 关闭控制板，CLOSE
+// 控制指令
+// 0000 -- 00 操控电位器，DOWN
+// 0011 -- 01 操控电位器，UP
+// 1100 -- 10 操控控制板，DOWN
+// 1111 -- 11 操控控制板，UP
+// 1122 -- 12 开启控制板，OPEN
+// 1133 -- 13 关闭控制板，CLOSE
 u32 Instruction_Decoding(void) // 指令编码函数
 {
   u32 returning = 0;
@@ -139,11 +138,11 @@ u32 Instruction_Decoding(void) // 指令编码函数
   {
       returning += 0; // Down 00 -- 0
   }
-  if (USB_Rx_Buffer[2] == (uint8_t)'2' && USB_Rx_Buffer[3] == (uint8_t)'2')
+  else if (USB_Rx_Buffer[2] == (uint8_t)'2' && USB_Rx_Buffer[3] == (uint8_t)'2')
   {
       returning += 2; // Open 22 -- 2
   }
-  if (USB_Rx_Buffer[2] == (uint8_t)'3' && USB_Rx_Buffer[3] == (uint8_t)'3')
+  else if (USB_Rx_Buffer[2] == (uint8_t)'3' && USB_Rx_Buffer[3] == (uint8_t)'3')
   {
       returning += 3; // Close 33 -- 3
   }
@@ -183,7 +182,7 @@ void Laser_Power_Change(u16 target) // 控制板调整函数
     u16 temp;
     if (target > 0 && target < 256)//控制范围
     {
-        PA_OFF(9); // 这边假设是置1锁功率，如果是置零锁功率的话还要调整
+        PA_OFF(8); // 这边假设是置1锁功率，如果是置零锁功率的话还要调整
         for (i = 0; i <= 7; i++)
         {
             temp = (target & 1);
@@ -197,7 +196,7 @@ void Laser_Power_Change(u16 target) // 控制板调整函数
                 PA_OFF(i);
             }
         }
-        PA_ON(9);
+        PA_ON(8);
     }
 }
 
@@ -235,9 +234,8 @@ u8 *Message_error(u8 *message) // 错误信息填充
 
 u8* Message_Info(u16 number, u8* message) // info的信息填充
 {                                         // 真想换一种方式，这也太丑了
-    switch (number)
+    if (number == 1)// 激光器成功开启
     {
-    case 1: // 激光器成功开启
         message[0] = 'L';
         message[1] = 'a';
         message[2] = 's';
@@ -247,8 +245,9 @@ u8* Message_Info(u16 number, u8* message) // info的信息填充
         message[6] = 'O';
         message[7] = 'N';
         message[8] = 0;
-        break;
-    case 2: // 激光器成功关闭
+    }
+    else if (number == 2)// 激光器成功关闭
+    {
         message[0] = 'L';
         message[1] = 'a';
         message[2] = 's';
@@ -259,13 +258,11 @@ u8* Message_Info(u16 number, u8* message) // info的信息填充
         message[7] = 'F';
         message[8] = 'F';
         message[9] = 0;
-        break;
-	default: break;
     }
     return message;
 }
 
-u16 Message_len(u8 *message) // 信息长度
+u16 Message_len(u8 *message) // 字符串长度
 {
   u16 len = 0;
   while (message[len] != 0)
@@ -357,13 +354,14 @@ void EP3_OUT_Callback(void)
 
     case 12:                         // 打开激光器
         PA_ON(9);                      // 先打开18针
-        Delay_1ms(5);                  // 按照说明需要延迟5ms
+        Delay_1ms(8);                  // 按照说明需要至少延迟5ms
         PA_ON(10);                     // 再打开19针
         Message_Info(1, Message_send); // 填充成功开启激光器
         break;
+
     case 13:                         // 关闭激光器
         PA_OFF(10);                    // 先关闭19针
-        Delay_1ms(5);                  // 这边八成也要延时5ms
+        Delay_1ms(8);                  // 这边八成也要至少延时5ms
         PA_OFF(9);                     // 再关闭18针
         Message_Info(2, Message_send); // 填充成功关闭激光器
         break;
@@ -371,8 +369,8 @@ void EP3_OUT_Callback(void)
     default: // 其他情况报错
       Message_error(Message_send);
     }
-    Resistance_Change(R_index);//改变阻值
-    Laser_Power_Change(Laser_Power);//改变控制板
+    Resistance_Change(R_index);// 改变阻值
+    Laser_Power_Change(Laser_Power);// 改变控制板
     USB_Send_string(Message_send, Message_len(Message_send)); // 发送消息至上位机
   }
 

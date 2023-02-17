@@ -30,10 +30,11 @@
 // 全局变量
 //-----------------------------------------------------------------
 // 接收成功标志
-extern u8 Resive_Flag;
-extern u16 Resive_Num;
-// 接收缓冲
-extern uint8_t USB_Rx_Buffer[VIRTUAL_COM_PORT_DATA_SIZE];
+//-----------------------------------------------------------------
+// 外部变量接口
+extern u8 Resive_Flag;// 接收标志位
+extern u16 Resive_Num;// 接收数据大小
+extern uint8_t USB_Rx_Buffer[VIRTUAL_COM_PORT_DATA_SIZE];// 接收缓冲区
 
 //-----------------------------------------------------------------
 // void USB_Send_string(u8* data_buffer)

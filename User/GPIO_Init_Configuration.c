@@ -35,9 +35,9 @@
 //-----------------------------------------------------------------
 void GPIO_Init_Configuration(void)
 {
-  int i = 0;
-  GPIO_InitTypeDef GPIO_InitStructure;
-  GPIO_InitTypeDef GPIO_InitStructureLight; // 激光模块 这里采用了A组
+  uint16_t i = 0;// 定义循环变量
+  GPIO_InitTypeDef GPIO_InitStructure; // 电位器 这里选用C组
+  GPIO_InitTypeDef GPIO_InitStructureLight; // 控制卡 这里采用了A组
 
   // 使能IO口时钟
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
@@ -49,14 +49,13 @@ void GPIO_Init_Configuration(void)
   // 推挽输出
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-  PC0_ON;
-  PC1_ON;
-  PC2_ON;
-  PC3_ON;
-  PC4_ON;
-  PC5_ON;
-  // 初始化GPIO口
+  // 初始化GPIOC口
+  PC0_OFF;
+  PC1_OFF;
+  PC2_OFF;
+  PC3_OFF;
+  PC4_OFF;
+  PC5_OFF;
 
   // GPIOA的0~10口打开
   GPIO_InitStructureLight.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10;
@@ -64,7 +63,7 @@ void GPIO_Init_Configuration(void)
   // 推挽输出
   GPIO_InitStructureLight.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructureLight);
-  // 初始化GPIO口
+  // 初始化GPIOA口
   for (i = 0; i <= 10; i++)
   {
     PA_OFF(i);

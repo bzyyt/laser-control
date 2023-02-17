@@ -218,7 +218,6 @@ void USB_Istr(void)
     {
         esof_counter = 0;
     }
-    
     /* resume handling timing is made with ESOFs */
     Resume(RESUME_ESOF); /* request without change of the machine state */
 
